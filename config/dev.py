@@ -25,7 +25,7 @@ class Config(BaseSettings):
 
     # MySQL
     MYSQL_USER: str = "root"
-    MYSQL_PASS: str = "zx3620382"
+    MYSQL_PASS: str = os.environ.get('MYSQL_PASS')
     MYSQL_HOST: Union[AnyHttpUrl, IPvAnyAddress] = "127.0.0.1"
     MYSQL_DATABASE: str = "easy_flow"
 
