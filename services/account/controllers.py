@@ -17,6 +17,9 @@ from services.account.schemas import (
 
 class AccountCtrl(BaseCtrl):
 
+    def _raise_not_found(self):
+        raise ApiException(201003, '该用户不存在')
+
     def exits_username(self, username: str):
         filters = [
             AccountModel.username == username,
@@ -25,7 +28,7 @@ class AccountCtrl(BaseCtrl):
 
     def create_account(self, create_schema: AccountCreateSchema):
         if self.exits_username(username=create_schema.username):
-            raise ApiException(201001, '该账号已存在')
+            raise ApiException(201005, '该账号已存在')
 
         create_schema.password = pbkdf2_password_hash(create_schema.password)
         q = insert(AccountModel).values(create_schema.dict(exclude_none=True))
@@ -41,7 +44,7 @@ class AccountCtrl(BaseCtrl):
         q = select(AccountModel).where(*filters)
         result = self.db.execute(q).scalar()
         if allow_raise and result is None:
-            raise ApiException(201002, '该用户不存在')
+            self._raise_not_found()
         return AccountOutSchema.from_orm(result) if result else None
 
     def retrieve_account(self, uid: int, allow_raise: bool = True):
@@ -52,15 +55,15 @@ class AccountCtrl(BaseCtrl):
         q = select(AccountModel).where(*filters)
         result = self.db.execute(q).scalar()
         if allow_raise and result is None:
-            raise ApiException(201002, '该用户不存在')
+            self._raise_not_found()
         return AccountOutSchema.from_orm(result) if result else None
 
     def login_by_password(self, username: str, password: str):
         account = self.retrieve_by_username(username, False)
         if not account.is_active:
-            raise ApiException(111111, '该用户已禁止登录')
+            raise ApiException(201002, '该用户已被禁止登录')
         if not account or not verify_pbkdf2_password(account.password, password):
-            raise ApiException(201003, '用户名或密码错误')
+            raise ApiException(201004, '用户名或密码错误')
         token_ctrl = AccountTokenCtrl()
         token = token_ctrl.create_token(account.uid)
         return AccountLoginOutSchema(user=account.copy(exclude={'password'}), token=token)

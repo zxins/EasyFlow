@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-from sqlalchemy import Column, BigInteger, String, DateTime
+from sqlalchemy import Column, BigInteger, String, DateTime, Integer
 
 from database import Base
 
@@ -16,6 +16,7 @@ class GroupModel(Base):
     description = Column(String(255), nullable=False, default="", comment="描述")
     manager_name = Column(String(25), nullable=False, default="", comment="负责人")
     manager_phone = Column(String(25), nullable=False, default="", comment="负责人手机号")
+    level = Column(Integer, nullable=False, default=1, comment="层级")
     created_at = Column(DateTime, nullable=False, default=datetime.now, comment="创建时间")
     updated_at = Column(DateTime, nullable=False, default=datetime.now, onupdate=datetime.now, comment="更新时间")
     deleted_at = Column(DateTime, nullable=True, comment="删除时间")

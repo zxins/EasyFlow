@@ -51,6 +51,7 @@ role_module = add_module(102, '角色')
 # group
 get_group_list_perm = add_permission(group_module, 1, '查看部门列表')
 create_group_perm = add_permission(group_module, 2, '创建部门')
+update_group_perm = add_permission(group_module, 3, '更新部门')
 
 # role
 get_role_list_perm = add_permission(role_module, 1, '查看角色列表')

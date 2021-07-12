@@ -12,6 +12,7 @@ from services.account.controllers import AccountCtrl, AccountTokenCtrl
 from services.account.schemas import AccountOutSchema
 from services.role.entities import Permission
 
+
 class Oauth2PasswordBearerOpen(OAuth2PasswordBearer):
 
     async def __call__(self, request: Request) -> Optional[str]:
@@ -19,10 +20,11 @@ class Oauth2PasswordBearerOpen(OAuth2PasswordBearer):
         scheme, param = get_authorization_scheme_param(authorization)
         if not authorization or scheme.lower() != "bearer":
             if self.auto_error:
-                raise ApiException(11111, '未授权')
+                raise ApiException(200002, "未授权，无法访问")
             else:
                 return None
         return param
+
 
 oauth2_scheme = Oauth2PasswordBearerOpen(tokenUrl="v1/login")
 
@@ -32,7 +34,7 @@ async def verify_token(token: str = Depends(oauth2_scheme)):
     ctrl = AccountTokenCtrl()
     token = ctrl.retrieve_token(token=token)
     if not token:
-        raise ApiException(111111, "未登录")
+        raise ApiException(200000, "未登录，无法访问")
     if datetime.now() >= token.expired_at:
         raise ApiException(200001, "登录状态失效")
     return token
@@ -46,14 +48,14 @@ async def get_current_user(token=Depends(verify_token)):
 
 async def get_current_active_user(user: AccountOutSchema = Depends(get_current_user)):
     if not user.is_active:
-        raise ApiException(111111, '该用户已禁止登录')
+        raise ApiException(201002, '该用户已被禁止登录')
     return user
 
 
 async def get_current_superuser(user: AccountOutSchema = Depends(get_current_user)):
     """ 管理员 """
     if not user.is_superuser:
-        raise ApiException(111111, "该用户没有足够的权限")
+        raise ApiException(201001, '非超级管理员无法操作')
     return user
 
 
@@ -63,7 +65,7 @@ def check_permission(permisssion: Permission):
         async def wrapper(*args, **kwargs):
             user = kwargs.get('user')
             if not user:
-                raise ApiException(111111, "未登录")
+                raise Exception("缺少User信息")  # 通常是未在接口参数中声明user
             if user.is_superuser:
                 return await func(*args, **kwargs)
 
