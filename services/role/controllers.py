@@ -4,7 +4,6 @@ from typing import List, Union
 from sqlalchemy import text, outerjoin, select, insert, update
 
 from library.controller import BaseCtrl
-from services.group.models import GroupModel
 from services.role.entities import MODULE_PERMISSIONS, MODULES, PERMISSIONS
 from services.role.models import RoleModel
 from services.role.schemas import (
@@ -23,21 +22,12 @@ class RoleCtrl(BaseCtrl):
         columns = RoleModel.__table__.columns.keys()
         fields = [text(f'{RoleModel.__tablename__}.{col}') for col in columns]
 
-        # 关联组
-        fields.append(GroupModel.name.label('group_name'))
-
         # 条件
         filters = [RoleModel.deleted_at.is_(None), ]
         if paginate_schema.name:
-            fields.append(RoleModel.name.like(f'%{paginate_schema.name}%'))
+            filters.append(RoleModel.name.like(f'%{paginate_schema.name}%'))
 
-        join_tables = outerjoin(
-            RoleModel,
-            GroupModel,
-            GroupModel.group_id == RoleModel.group_id
-        )
-
-        q = select(fields).select_from(join_tables).where(*filters).order_by(RoleModel.created_at.desc())
+        q = select(fields).select_from(RoleModel.__table__).where(*filters).order_by(RoleModel.created_at.desc())
         per_page = paginate_schema.per_page
         page = paginate_schema.page
         return super()._get_pagination_by_query(q, RoleOutSchema, per_page, page)

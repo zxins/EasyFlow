@@ -15,8 +15,6 @@ class RoleOutSchema(BaseModel):
     """ 输出角色 """
     role_id: int = Field(..., title="角色id")
     name: str = Field(..., title="角色名称")
-    group_id: int = Field(..., title="组id")
-    group_name: Optional[str] = Field(None, title="组名称")
     permissions: Json
 
     class Config:
@@ -61,5 +59,4 @@ class RolePermissionOutSchema(RolePermissionOutShortSchema):
 class RoleCreateSchema(BaseModel):
     """ 创建角色入参 """
     name: str = Field(..., title="角色名称")
-    group_id: int = Field(..., title="组id")
     permissions: Optional[List[Union[str, int]]] = Field([], title="权限列表")

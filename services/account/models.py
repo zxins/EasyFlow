@@ -10,6 +10,7 @@ class AccountModel(Base):
     __tablename__ = 'account'
 
     uid = Column(BigInteger, primary_key=True, autoincrement=True, comment="账户id")
+    group_id = Column(BigInteger, nullable=False, default=0, comment="部门/分组id")
     role_id = Column(BigInteger, nullable=False, default=0, comment="角色id")
     username = Column(String(35), nullable=False, comment="登录账号")
     password = Column(String(255), nullable=False, comment="密码(加密后)")
